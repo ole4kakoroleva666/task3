@@ -1,5 +1,5 @@
 <template>
-  <div class="task-card">
+  <div class="task-card" :class="{ 'task-overdue': task.isOverdue }">
     <div class="task-header">
       <h3>{{ task.title }}</h3>
       <div class="task-actions">
@@ -16,6 +16,15 @@
       <div v-if="task.lastEditedAt !== task.createdAt" class="edited">
         Edited: {{ formatDate(task.lastEditedAt) }}
       </div>
+    </div>
+
+    <div v-if="task.status === 'completed'" class="status-badge" :class="{ 'overdue': task.isOverdue, 'ontime': !task.isOverdue }">
+      <span v-if="task.isOverdue">Completed after deadline</span>
+      <span v-else>Completed on time</span>
+    </div>
+
+    <div v-if="task.returnReason" class="return-reason">
+      <strong>Return reason:</strong> {{ task.returnReason }}
     </div>
 
     <div class="task-footer">
@@ -42,6 +51,14 @@
       >
         → Move to Completed
       </button>
+
+      <button 
+        v-if="task.status === 'testing'" 
+        @click="$emit('return-to-inprogress')" 
+        class="move-btn back"
+      >
+        ← Return to In Progress
+      </button>
     </div>
   </div>
 </template>
@@ -54,7 +71,7 @@ const props = defineProps({
   }
 });
 
-defineEmits(['edit', 'delete', 'move']);
+defineEmits(['edit', 'delete', 'move', 'return-to-inprogress']);
 
 const formatDate = (date) => {
   const d = new Date(date);
@@ -73,8 +90,11 @@ const formatDate = (date) => {
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border-left: 3px solid #5f4987;
+  border-left: 3px solid #4f7c51;
+}
+
+.task-card.task-overdue {
+  border-left-color: #c46f69;
 }
 
 .task-header {
@@ -87,7 +107,7 @@ const formatDate = (date) => {
 .task-header h3 {
   margin: 0;
   font-size: 16px;
-  color: #3b3838;
+  color: #242323;
 }
 
 .task-actions {
@@ -101,7 +121,6 @@ const formatDate = (date) => {
   cursor: pointer;
   font-size: 14px;
   padding: 2px 4px;
-  opacity: 0.6;
 }
 
 .icon-btn:hover {
@@ -111,13 +130,12 @@ const formatDate = (date) => {
 .task-card p {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #3b3838;
-  line-height: 1.4;
+  color: #5c5959;
 }
 
 .task-dates {
-  font-size: 12px;
-  color: #3b3838;
+  font-size: 10px;
+  color: #242323;
   padding-top: 8px;
   margin-bottom: 12px;
 }
@@ -127,27 +145,67 @@ const formatDate = (date) => {
 }
 
 .edited {
-  color: #c87658;
+  color: #242323;
   font-style: italic;
 }
 
+.status-badge {
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.status-badge.overdue {
+  background-color: #ffebee;
+  color: #c46f69;
+}
+
+.status-badge.ontime {
+  background-color: #e8f5e9;
+  color: #4f7c51;
+}
+
+.return-reason {
+  background-color: #faf5e6;
+  color: #856404;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
 .task-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-top: 8px;
 }
 
 .move-btn {
   width: 100%;
-  background-color: #948ca3;
+  background-color: #eef7fd;
   border: none;
   border-radius: 4px;
   padding: 6px;
-  color: #3b3838;
+  color: #83a6ca;
   cursor: pointer;
   font-size: 12px;
   transition: background-color 0.2s;
 }
 
 .move-btn:hover {
-  background-color: #726885;
+  background-color: #bbdefb;
+}
+
+.move-btn.back {
+  background-color: #faf5e6;
+  color: #856404;
+}
+
+.move-btn.back:hover {
+  background-color: #f9e5c7;
 }
 </style>

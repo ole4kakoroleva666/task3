@@ -140,13 +140,6 @@ const handleSubmit = () => {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  font-family: inherit;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #4CAF50;
 }
 
 .form-actions {

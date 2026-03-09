@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { v4 as uuidv4 } from 'uuid'; // npm install uuid
+import { v4 as uuidv4 } from 'uuid';
 
 export const useTaskStore = defineStore('tasks', () => {
     const tasks = ref([{
@@ -23,16 +23,36 @@ export const useTaskStore = defineStore('tasks', () => {
         },
         {
             id: '3',
-            title: 'Design UI',
-            description: 'Create mockups for the board',
+            title: 'Test login feature',
+            description: 'Test user authentication flow',
             createdAt: new Date('2024-03-01T09:00:00'),
             deadline: new Date('2024-03-08T17:00:00'),
             lastEditedAt: new Date('2024-03-01T09:00:00'),
-            status: 'planned'
+            status: 'testing',
+            returnReason: 'Found bugs in login flow'
+        },
+        {
+            id: '4',
+            title: 'Fix navigation bug',
+            description: 'Fix menu navigation on mobile',
+            createdAt: new Date('2024-03-03T14:00:00'),
+            deadline: new Date('2024-03-04T18:00:00'), // просрочка (вчера)
+            lastEditedAt: new Date('2024-03-03T14:00:00'),
+            status: 'completed',
+            isOverdue: true // просрочена
+        },
+        {
+            id: '5',
+            title: 'Update dependencies',
+            description: 'Update all npm packages',
+            createdAt: new Date('2024-03-02T09:00:00'),
+            deadline: new Date('2024-03-09T18:00:00'), // еще не просрочено
+            lastEditedAt: new Date('2024-03-02T09:00:00'),
+            status: 'completed',
+            isOverdue: false // выполнена в срок
         }
     ]);
 
-    // СОЗДАНИЕ новой задачи
     const createTask = (taskData) => {
         const newTask = {
             id: uuidv4(),
@@ -41,32 +61,49 @@ export const useTaskStore = defineStore('tasks', () => {
             deadline: taskData.deadline,
             createdAt: new Date(),
             lastEditedAt: new Date(),
-            status: 'planned' // новые задачи всегда в первой колонке
+            status: 'planned'
         };
         tasks.value.push(newTask);
     };
 
-    // ОБНОВЛЕНИЕ задачи
     const updateTask = (taskId, updates) => {
         const task = tasks.value.find(t => t.id === taskId);
         if (task) {
             task.title = updates.title || task.title;
             task.description = updates.description || task.description;
             task.deadline = updates.deadline || task.deadline;
-            task.lastEditedAt = new Date(); // обновляем время редактирования
+            task.lastEditedAt = new Date();
         }
     };
 
-    // УДАЛЕНИЕ задачи
     const deleteTask = (taskId) => {
         tasks.value = tasks.value.filter(t => t.id !== taskId);
     };
 
-    const moveTask = (taskId, newStatus) => {
+    // ОБНОВЛЕННАЯ функция moveTask - проверяет дедлайн при перемещении в completed
+    const moveTask = (taskId, newStatus, reason = '') => {
         const task = tasks.value.find(t => t.id === taskId);
         if (task) {
+            const oldStatus = task.status;
             task.status = newStatus;
             task.lastEditedAt = new Date();
+
+            // Если возвращаем из testing в inProgress, сохраняем причину
+            if (newStatus === 'inProgress' && reason) {
+                task.returnReason = reason;
+            }
+
+            // ЕСЛИ ПЕРЕМЕЩАЕМ В COMPLETED - ПРОВЕРЯЕМ ДЕДЛАЙН
+            if (newStatus === 'completed') {
+                const now = new Date();
+                const deadline = new Date(task.deadline);
+                task.isOverdue = deadline < now;
+            }
+
+            // Если перемещаем из completed обратно, можно сбросить флаг (опционально)
+            if (oldStatus === 'completed' && newStatus !== 'completed') {
+                task.isOverdue = undefined;
+            }
         }
     };
 
