@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { v4 as uuidv4 } from 'uuid'; // npm install uuid
 
 export const useTaskStore = defineStore('tasks', () => {
     const tasks = ref([{
@@ -31,12 +32,41 @@ export const useTaskStore = defineStore('tasks', () => {
         }
     ]);
 
-    // НОВАЯ ФУНКЦИЯ для перемещения задач
+    // СОЗДАНИЕ новой задачи
+    const createTask = (taskData) => {
+        const newTask = {
+            id: uuidv4(),
+            title: taskData.title,
+            description: taskData.description,
+            deadline: taskData.deadline,
+            createdAt: new Date(),
+            lastEditedAt: new Date(),
+            status: 'planned' // новые задачи всегда в первой колонке
+        };
+        tasks.value.push(newTask);
+    };
+
+    // ОБНОВЛЕНИЕ задачи
+    const updateTask = (taskId, updates) => {
+        const task = tasks.value.find(t => t.id === taskId);
+        if (task) {
+            task.title = updates.title || task.title;
+            task.description = updates.description || task.description;
+            task.deadline = updates.deadline || task.deadline;
+            task.lastEditedAt = new Date(); // обновляем время редактирования
+        }
+    };
+
+    // УДАЛЕНИЕ задачи
+    const deleteTask = (taskId) => {
+        tasks.value = tasks.value.filter(t => t.id !== taskId);
+    };
+
     const moveTask = (taskId, newStatus) => {
         const task = tasks.value.find(t => t.id === taskId);
         if (task) {
             task.status = newStatus;
-            task.lastEditedAt = new Date(); // обновляем время редактирования
+            task.lastEditedAt = new Date();
         }
     };
 
@@ -62,6 +92,9 @@ export const useTaskStore = defineStore('tasks', () => {
         inProgressTasks,
         testingTasks,
         completedTasks,
-        moveTask // НЕ ЗАБУДЬ ДОБАВИТЬ В RETURN
+        createTask,
+        updateTask,
+        deleteTask,
+        moveTask
     };
 });
