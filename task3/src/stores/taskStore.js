@@ -28,17 +28,17 @@ export const useTaskStore = defineStore('tasks', () => {
             deadline: new Date('2024-03-08T17:00:00'),
             lastEditedAt: new Date('2024-03-01T09:00:00'),
             status: 'planned'
-        },
-        {
-            id: '4',
-            title: 'Fix bugs',
-            description: 'Fix issues in task movement',
-            createdAt: new Date('2024-03-03T11:20:00'),
-            deadline: new Date('2024-03-04T15:00:00'),
-            lastEditedAt: new Date('2024-03-03T16:45:00'),
-            status: 'inProgress'
         }
     ]);
+
+    // НОВАЯ ФУНКЦИЯ для перемещения задач
+    const moveTask = (taskId, newStatus) => {
+        const task = tasks.value.find(t => t.id === taskId);
+        if (task) {
+            task.status = newStatus;
+            task.lastEditedAt = new Date(); // обновляем время редактирования
+        }
+    };
 
     const plannedTasks = computed(() =>
         tasks.value.filter(task => task.status === 'planned')
@@ -61,6 +61,7 @@ export const useTaskStore = defineStore('tasks', () => {
         plannedTasks,
         inProgressTasks,
         testingTasks,
-        completedTasks
+        completedTasks,
+        moveTask // НЕ ЗАБУДЬ ДОБАВИТЬ В RETURN
     };
 });

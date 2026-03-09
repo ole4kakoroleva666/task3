@@ -7,7 +7,10 @@
         <TaskCard 
           v-for="task in store.plannedTasks" 
           :key="task.id" 
-          :task="task" 
+          :task="task"
+          @edit="handleEdit(task)"
+          @delete="handleDelete(task.id)"
+          @move="(newStatus) => handleMove(task.id, newStatus)"
         />
       </div>
       
@@ -16,12 +19,23 @@
         <TaskCard 
           v-for="task in store.inProgressTasks" 
           :key="task.id" 
-          :task="task" 
+          :task="task"
+          @edit="handleEdit(task)"
+          @delete="handleDelete(task.id)"
+          @move="(newStatus) => handleMove(task.id, newStatus)"
         />
       </div>
       
       <div class="column">
         <h2>Testing ({{ store.testingTasks.length }})</h2>
+        <TaskCard 
+          v-for="task in store.testingTasks" 
+          :key="task.id" 
+          :task="task"
+          @edit="handleEdit(task)"
+          @delete="handleDelete(task.id)"
+          @move="(newStatus) => handleMove(task.id, newStatus)"
+        />
         <div v-if="store.testingTasks.length === 0" class="empty-message">
           No tasks in testing
         </div>
@@ -29,6 +43,13 @@
       
       <div class="column">
         <h2>Completed ({{ store.completedTasks.length }})</h2>
+        <TaskCard 
+          v-for="task in store.completedTasks" 
+          :key="task.id" 
+          :task="task"
+          @edit="handleEdit(task)"
+          @delete="handleDelete(task.id)"
+        />
         <div v-if="store.completedTasks.length === 0" class="empty-message">
           No completed tasks
         </div>
@@ -38,10 +59,24 @@
 </template>
 
 <script setup>
-import { useTaskStore } from './stores/taskStore';
+import { useTaskStore } from '@/stores/taskStore';
 import TaskCard from '@/components/board/taskCard.vue';
 
 const store = useTaskStore();
+
+const handleEdit = (task) => {
+  console.log('Edit task:', task);
+};
+
+const handleDelete = (taskId) => {
+  if (confirm('Are you sure you want to delete this task?')) {
+    console.log('Delete task:', taskId);
+  }
+};
+
+const handleMove = (taskId, newStatus) => {
+  store.moveTask(taskId, newStatus);
+};
 </script>
 
 <style>
@@ -50,6 +85,10 @@ const store = useTaskStore();
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+.app h1 {
+  color: aqua;
 }
 
 h1 {
@@ -76,8 +115,6 @@ h1 {
   margin-bottom: 15px;
   font-size: 18px;
   color: #333;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #ddd;
 }
 
 .empty-message {
