@@ -82,6 +82,7 @@ const handleSubmit = () => {
   border-radius: 4px;
   margin-bottom: 1.5rem;
   font-size: 14px;
+  color: #333;
 }
 
 .form-group {
@@ -106,7 +107,7 @@ const handleSubmit = () => {
 
 .form-group textarea:focus {
   outline: none;
-  border-color: #f57c00;
+  border-color: #f2bc85;
 }
 
 .form-actions {
@@ -125,12 +126,12 @@ const handleSubmit = () => {
 }
 
 .btn-primary {
-  background-color: #f57c00;
+  background-color: #e0ae7c;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #e65100;
+  background-color: #ce9677;
 }
 
 .btn-secondary {

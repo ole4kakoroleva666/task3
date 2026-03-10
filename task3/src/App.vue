@@ -1,9 +1,9 @@
 <template>
   <div class="app">
-    <h1>My Kanban Board</h1>
+    <h1>Kanban Board</h1>
     
     <button @click="openCreateModal" class="create-main-btn">
-      + Create New Task
+      + Create new task
     </button>
 
     <div class="board">
@@ -146,6 +146,10 @@ const handleReturnSubmit = (reason) => {
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+.app h1{
+  color: aqua;
 }
 
 h1 {

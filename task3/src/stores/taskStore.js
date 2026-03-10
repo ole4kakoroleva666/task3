@@ -3,55 +3,33 @@ import { ref, computed } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 
 export const useTaskStore = defineStore('tasks', () => {
-    const tasks = ref([{
-            id: '1',
-            title: 'Learn Vue 3',
-            description: 'Complete the kanban board project',
-            createdAt: new Date('2024-03-01T10:00:00'),
-            deadline: new Date('2024-03-10T18:00:00'),
-            lastEditedAt: new Date('2024-03-01T10:00:00'),
-            status: 'planned'
-        },
-        {
-            id: '2',
-            title: 'Write documentation',
-            description: 'Document all components and their props',
-            createdAt: new Date('2024-03-02T14:30:00'),
-            deadline: new Date('2024-03-05T12:00:00'),
-            lastEditedAt: new Date('2024-03-03T09:15:00'),
-            status: 'inProgress'
-        },
-        {
-            id: '3',
-            title: 'Test login feature',
-            description: 'Test user authentication flow',
-            createdAt: new Date('2024-03-01T09:00:00'),
-            deadline: new Date('2024-03-08T17:00:00'),
-            lastEditedAt: new Date('2024-03-01T09:00:00'),
-            status: 'testing',
-            returnReason: 'Found bugs in login flow'
-        },
-        {
-            id: '4',
-            title: 'Fix navigation bug',
-            description: 'Fix menu navigation on mobile',
-            createdAt: new Date('2024-03-03T14:00:00'),
-            deadline: new Date('2024-03-04T18:00:00'), // просрочка (вчера)
-            lastEditedAt: new Date('2024-03-03T14:00:00'),
-            status: 'completed',
-            isOverdue: true // просрочена
-        },
-        {
-            id: '5',
-            title: 'Update dependencies',
-            description: 'Update all npm packages',
-            createdAt: new Date('2024-03-02T09:00:00'),
-            deadline: new Date('2024-03-09T18:00:00'), // еще не просрочено
-            lastEditedAt: new Date('2024-03-02T09:00:00'),
-            status: 'completed',
-            isOverdue: false // выполнена в срок
+    const tasks = ref([]);
+
+    const loadTasks = () => {
+        const savedTasks = localStorage.getItem('kanban-tasks');
+        if (savedTasks) {
+            try {
+                const parsed = JSON.parse(savedTasks).map(task => ({
+                    ...task,
+                    createdAt: new Date(task.createdAt),
+                    deadline: new Date(task.deadline),
+                    lastEditedAt: new Date(task.lastEditedAt)
+                }));
+                tasks.value = parsed;
+            } catch (e) {
+                console.error('Error loading tasks:', e);
+                tasks.value = [];
+            }
+        } else {
+            tasks.value = [];
         }
-    ]);
+    };
+
+    const saveTasks = () => {
+        localStorage.setItem('kanban-tasks', JSON.stringify(tasks.value));
+    };
+
+    loadTasks();
 
     const createTask = (taskData) => {
         const newTask = {
@@ -64,6 +42,7 @@ export const useTaskStore = defineStore('tasks', () => {
             status: 'planned'
         };
         tasks.value.push(newTask);
+        saveTasks();
     };
 
     const updateTask = (taskId, updates) => {
@@ -73,14 +52,15 @@ export const useTaskStore = defineStore('tasks', () => {
             task.description = updates.description || task.description;
             task.deadline = updates.deadline || task.deadline;
             task.lastEditedAt = new Date();
+            saveTasks();
         }
     };
 
     const deleteTask = (taskId) => {
         tasks.value = tasks.value.filter(t => t.id !== taskId);
+        saveTasks();
     };
 
-    // ОБНОВЛЕННАЯ функция moveTask - проверяет дедлайн при перемещении в completed
     const moveTask = (taskId, newStatus, reason = '') => {
         const task = tasks.value.find(t => t.id === taskId);
         if (task) {
@@ -88,24 +68,24 @@ export const useTaskStore = defineStore('tasks', () => {
             task.status = newStatus;
             task.lastEditedAt = new Date();
 
-            // Если возвращаем из testing в inProgress, сохраняем причину
             if (newStatus === 'inProgress' && reason) {
                 task.returnReason = reason;
             }
 
-            // ЕСЛИ ПЕРЕМЕЩАЕМ В COMPLETED - ПРОВЕРЯЕМ ДЕДЛАЙН
             if (newStatus === 'completed') {
                 const now = new Date();
                 const deadline = new Date(task.deadline);
                 task.isOverdue = deadline < now;
             }
 
-            // Если перемещаем из completed обратно, можно сбросить флаг (опционально)
             if (oldStatus === 'completed' && newStatus !== 'completed') {
                 task.isOverdue = undefined;
             }
+
+            saveTasks();
         }
     };
+
 
     const plannedTasks = computed(() =>
         tasks.value.filter(task => task.status === 'planned')
@@ -122,6 +102,7 @@ export const useTaskStore = defineStore('tasks', () => {
     const completedTasks = computed(() =>
         tasks.value.filter(task => task.status === 'completed')
     );
+
 
     return {
         tasks,

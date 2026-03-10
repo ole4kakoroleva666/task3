@@ -63,7 +63,6 @@ const emit = defineEmits(['close', 'save']);
 
 const isEditing = !!props.taskToEdit;
 
-// Форматируем дату для input datetime-local
 const formatDateForInput = (date) => {
   const d = new Date(date);
   const year = d.getFullYear();
@@ -74,13 +73,12 @@ const formatDateForInput = (date) => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
-// Начальные данные формы
 const form = ref({
   title: props.taskToEdit?.title || '',
   description: props.taskToEdit?.description || '',
   deadline: props.taskToEdit 
     ? formatDateForInput(props.taskToEdit.deadline)
-    : formatDateForInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)) // неделя от сегодня
+    : formatDateForInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
 });
 
 const handleSubmit = () => {
