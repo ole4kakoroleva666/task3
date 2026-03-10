@@ -13,7 +13,12 @@ export const useTaskStore = defineStore('tasks', () => {
                     ...task,
                     createdAt: new Date(task.createdAt),
                     deadline: new Date(task.deadline),
-                    lastEditedAt: new Date(task.lastEditedAt)
+                    lastEditedAt: new Date(task.lastEditedAt),
+                    checklist: task.checklist || [
+                        { id: 1, text: '', completed: false },
+                        { id: 2, text: '', completed: false },
+                        { id: 3, text: '', completed: false }
+                    ]
                 }));
                 tasks.value = parsed;
             } catch (e) {
@@ -39,7 +44,12 @@ export const useTaskStore = defineStore('tasks', () => {
             deadline: taskData.deadline,
             createdAt: new Date(),
             lastEditedAt: new Date(),
-            status: 'planned'
+            status: 'planned',
+            checklist: task.checklist || [
+                { id: 1, text: '', completed: false },
+                { id: 2, text: '', completed: false },
+                { id: 3, text: '', completed: false }
+            ]
         };
         tasks.value.push(newTask);
         saveTasks();
@@ -51,6 +61,9 @@ export const useTaskStore = defineStore('tasks', () => {
             task.title = updates.title || task.title;
             task.description = updates.description || task.description;
             task.deadline = updates.deadline || task.deadline;
+            if (updates.checklist) {
+                task.checklist = updates.checklist;
+            }
             task.lastEditedAt = new Date();
             saveTasks();
         }
@@ -61,9 +74,33 @@ export const useTaskStore = defineStore('tasks', () => {
         saveTasks();
     };
 
+    const toggleCheckListItem = (taskId, itemId) => {
+        const task = tasks.value.find(t => t.id === taskId);
+        if (task) {
+            const item = task.checklist.find(i => i.id === itemId);
+            if (item) {
+                item.completed = !item.completed;
+                task.lastEditedAt = new Date();
+                saveTasks();
+            }
+        }
+    };
+
+    const isChecklistComplete = (taskId) => {
+        const task = tasks.value.find(t => t.id === taskId);
+        if (!task) return false;
+        return task.checklist.every(item => item.text && item.completed);
+    };
+
+
     const moveTask = (taskId, newStatus, reason = '') => {
         const task = tasks.value.find(t => t.id === taskId);
         if (task) {
+            if (newStatus === 'completed' && !isChecklistComplete(taskId)) {
+                console.warn('Cannot move to completed: checklist not complete');
+                return;
+            }
+
             const oldStatus = task.status;
             task.status = newStatus;
             task.lastEditedAt = new Date();
@@ -86,6 +123,17 @@ export const useTaskStore = defineStore('tasks', () => {
         }
     };
 
+    const getCompletedChecklistCount = (taskId) => {
+        const task = tasks.value.find(t => t.id === taskId);
+        if (!task) return 0;
+        return task.checklist.filter(item => item.completed).length;
+    };
+
+    const getTotalChecklistCount = (taskId) => {
+        const task = tasks.value.find(t => t.id === taskId);
+        if (!task) return 0;
+        return task.checklist.filter(item => item.text).length;
+    };
 
     const plannedTasks = computed(() =>
         tasks.value.filter(task => task.status === 'planned')
@@ -103,7 +151,6 @@ export const useTaskStore = defineStore('tasks', () => {
         tasks.value.filter(task => task.status === 'completed')
     );
 
-
     return {
         tasks,
         plannedTasks,
@@ -113,6 +160,10 @@ export const useTaskStore = defineStore('tasks', () => {
         createTask,
         updateTask,
         deleteTask,
-        moveTask
+        moveTask,
+        toggleChecklistItem,
+        isChecklistComplete,
+        getCompletedChecklistCount,
+        getTotalChecklistCount
     };
 });

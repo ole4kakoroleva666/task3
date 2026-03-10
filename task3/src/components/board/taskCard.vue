@@ -3,8 +3,8 @@
     <div class="task-header">
       <h3>{{ task.title }}</h3>
       <div class="task-actions">
-        <button @click="$emit('edit')" class="icon-btn" title="Edit">edit</button>
-        <button @click="$emit('delete')" class="icon-btn" title="Delete">delete</button>
+        <button @click="$emit('edit')" title="Edit">edit</button>
+        <button @click="$emit('delete')"  title="Delete">delete</button>
       </div>
     </div>
     

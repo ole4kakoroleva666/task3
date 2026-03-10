@@ -37,7 +37,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" @click="$emit('close')" class="btn btn-secondary">
+          <button type="button" @click="$emit('close')" class="btn">
             Cancel
           </button>
           <button type="submit" class="btn btn-primary">
