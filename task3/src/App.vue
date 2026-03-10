@@ -16,6 +16,7 @@
           @edit="openEditModal(task)"
           @delete="handleDelete(task.id)"
           @move="(newStatus) => handleMove(task.id, newStatus)"
+          @update-checklist="(checklist) => updateTaskChecklist(task.id, checklist)"
         />
       </div>
       
@@ -139,6 +140,10 @@ const handleReturnSubmit = (reason) => {
   store.moveTask(returningTask.value.id, 'inProgress', reason);
   closeReturnModal();
 };
+
+const updateTaskChecklist = (taskId, checklist) => {
+  store.updateTask(taskId, { checklist })
+}
 </script>
 
 <style>

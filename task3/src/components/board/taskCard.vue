@@ -4,7 +4,7 @@
       <h3>{{ task.title }}</h3>
       <div class="task-actions">
         <button @click="$emit('edit')" title="Edit">edit</button>
-        <button @click="$emit('delete')"  title="Delete">delete</button>
+        <button @click="$emit('delete')" title="Delete">delete</button>
       </div>
     </div>
     
@@ -15,6 +15,20 @@
       <div>Deadline: {{ formatDate(task.deadline) }}</div>
       <div v-if="task.lastEditedAt !== task.createdAt" class="edited">
         Edited: {{ formatDate(task.lastEditedAt) }}
+      </div>
+    </div>
+
+    <div v-if="task.checklist && task.checklist.length > 0" class="task-checklist">
+      <div class="checklist-title">Items:</div>
+      <div v-for="(item, index) in task.checklist" :key="index" class="checklist-item">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            :checked="item.done"
+            @change="toggleItem(index)"
+          >
+          <span :class="{ 'item-done': item.done }">{{ item.text }}</span>
+        </label>
       </div>
     </div>
 
@@ -46,7 +60,7 @@
       
       <button 
         v-if="task.status === 'testing'" 
-        @click="$emit('move', 'completed')" 
+        @click="moveToCompleted"  
         class="move-btn"
       >
         → Move to Completed
@@ -71,7 +85,13 @@ const props = defineProps({
   }
 });
 
-defineEmits(['edit', 'delete', 'move', 'return-to-inprogress']);
+const emit = defineEmits(['edit', 'delete', 'move', 'return-to-inprogress', 'update-checklist']);
+
+const toggleItem = (index) => {
+  const updatedChecklist = [...props.task.checklist];
+  updatedChecklist[index].done = !updatedChecklist[index].done;
+  emit('update-checklist', updatedChecklist);
+};
 
 const formatDate = (date) => {
   const d = new Date(date);
@@ -82,6 +102,19 @@ const formatDate = (date) => {
     minute: '2-digit'
   });
 };
+
+const moveToCompleted = () => {
+  if (props.task.checklist && props.task.checklist.length > 0) {
+    const allDone = props.task.checklist.every(item => item.done === true)
+    
+    if (!allDone) {
+      alert('First, complete all steps!')
+      return
+    }
+  }
+  
+  emit('move', 'completed')
+}
 </script>
 
 <style scoped>
@@ -113,18 +146,6 @@ const formatDate = (date) => {
 .task-actions {
   display: flex;
   gap: 4px;
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 2px 4px;
-}
-
-.icon-btn:hover {
-  opacity: 1;
 }
 
 .task-card p {
@@ -208,4 +229,13 @@ const formatDate = (date) => {
 .move-btn.back:hover {
   background-color: #f9e5c7;
 }
+
+.checklist-title {
+    color: #242323
+}
+
+.checkbox-label {
+    color: #242323
+}
+
 </style>

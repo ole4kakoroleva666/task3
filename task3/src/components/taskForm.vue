@@ -36,6 +36,19 @@
           />
         </div>
 
+        <div class="form-group">
+            <label>Task items (up to 3):</label>
+            <div class="item-row">
+            <input type="text" v-model="form.item1" placeholder="Item 1" />
+        </div>
+        <div class="item-row">
+            <input type="text" v-model="form.item2" placeholder="Item 2" />
+        </div>
+        <div class="item-row">
+            <input type="text" v-model="form.item3" placeholder="Item 3" />
+        </div>
+        </div>
+
         <div class="form-actions">
           <button type="button" @click="$emit('close')" class="btn">
             Cancel
@@ -78,14 +91,23 @@ const form = ref({
   description: props.taskToEdit?.description || '',
   deadline: props.taskToEdit 
     ? formatDateForInput(props.taskToEdit.deadline)
-    : formatDateForInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+    : formatDateForInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
+    item1: '',
+    item2: '',
+    item3: ''
 });
 
 const handleSubmit = () => {
+   const checklist = []
+    if (form.value.item1) checklist.push({ text: form.value.item1, done: false })
+    if (form.value.item2) checklist.push({ text: form.value.item2, done: false })
+    if (form.value.item3) checklist.push({ text: form.value.item3, done: false })
+  
   emit('save', {
     title: form.value.title,
     description: form.value.description,
-    deadline: new Date(form.value.deadline)
+    deadline: new Date(form.value.deadline),
+    checklist: checklist
   });
 };
 </script>
