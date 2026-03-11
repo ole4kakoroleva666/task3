@@ -148,7 +148,6 @@ const handleSubmit = () => {
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
   font-weight: 500;
   color: #333;
 }
@@ -158,7 +157,6 @@ const handleSubmit = () => {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid #ddd;
-  border-radius: 4px;
   font-size: 1rem;
 }
 

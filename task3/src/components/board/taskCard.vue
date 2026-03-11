@@ -2,7 +2,8 @@
   <div class="task-card" :class="{ 'task-overdue': task.isOverdue }">
     <div class="task-header">
       <h3>{{ task.title }}</h3>
-      <div class="task-actions">
+      <div class="task-actions" v-if="task.status !== 'completed'"">
+
         <button @click="$emit('edit')" title="Edit">edit</button>
         <button @click="$emit('delete')" title="Delete">delete</button>
       </div>
@@ -26,6 +27,7 @@
             type="checkbox" 
             :checked="item.done"
             @change="toggleItem(index)"
+            :disabled="task.status === 'completed'"
           >
           <span :class="{ 'item-done': item.done }">{{ item.text }}</span>
         </label>
